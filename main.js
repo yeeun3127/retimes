@@ -2,6 +2,11 @@ const API_KEY = `802b0b4ba9d44b078e2a3d0925cc42cb`;
 const url1 = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${API_KEY}`;
 const url2 = "https://re-times.netlify.app/top-headlines";
 let newsList = [];
+const menus = document.querySelectorAll(".menus button");
+menus.forEach((menu) =>
+  menu.addEventListener("click", (event) => getNewsByCategory(event))
+);
+
 const getLatestNews = async () => {
   const url = new URL(url2);
 
@@ -12,6 +17,18 @@ const getLatestNews = async () => {
   console.log("ddddd", newsList);
 };
 
+const getNewsByCategory = async (event) => {
+  const category = event.target.textContent.toLowerCase();
+  console.log("category");
+  const url = new URL(
+    `https://re-times.netlify.app/top-headlines?country=kr&category=${category}`
+  );
+  const response = await fetch(url);
+  const data = await response.json();
+  console.log("Dddddd", data);
+  newsList = data.articles;
+  render();
+};
 /* Set the width of the side navigation to 250px */
 function openNav() {
   document.getElementById("mySidenav").style.width = "250px";
@@ -31,6 +48,18 @@ const openSearchBox = () => {
   }
 };
 
+const getNewsBykeyword = async () => {
+  const keyword = document.getElementById("search-input");
+  console.log("keyword");
+  const url = new URL(
+    `https://re-times.netlify.app/top-headlines?country=kr&q=${keyword}`
+  );
+  const response = await fetch(url);
+  const data = await response.json();
+  console.log("keyword data", data);
+  newsList = data.articles;
+  render();
+};
 const render = () => {
   const newsHTML = newsList
     .map(

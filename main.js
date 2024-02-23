@@ -6,28 +6,40 @@ const menus = document.querySelectorAll(".menus button");
 menus.forEach((menu) =>
   menu.addEventListener("click", (event) => getNewsByCategory(event))
 );
+let url = new URL(`https://re-times.netlify.app/top-headlines`);
+
+const getNews = async () => {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (response.status === 200) {
+      if (data.articles.length === 0) {
+        throw new Error("No result for this search");
+      }
+      newsList = data.articles;
+      render();
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (error) {
+    errorRender(error.message);
+  }
+};
 
 const getLatestNews = async () => {
-  const url = new URL(url2);
+  url = new URL(url2);
 
-  const response = await fetch(url);
-  const data = await response.json();
-  newsList = data.articles;
-  render();
+  getNews();
   console.log("ddddd", newsList);
 };
 
 const getNewsByCategory = async (event) => {
   const category = event.target.textContent.toLowerCase();
   console.log("category");
-  const url = new URL(
+  url = new URL(
     `https://re-times.netlify.app/top-headlines?country=kr&category=${category}`
   );
-  const response = await fetch(url);
-  const data = await response.json();
-  console.log("Dddddd", data);
-  newsList = data.articles;
-  render();
+  getNews();
 };
 /* Set the width of the side navigation to 250px */
 function openNav() {
@@ -51,15 +63,12 @@ const openSearchBox = () => {
 const getNewsBykeyword = async () => {
   const keyword = document.getElementById("search-input");
   console.log("keyword");
-  const url = new URL(
+  url = new URL(
     `https://re-times.netlify.app/top-headlines?country=kr&q=${keyword}`
   );
-  const response = await fetch(url);
-  const data = await response.json();
-  console.log("keyword data", data);
-  newsList = data.articles;
-  render();
+  getNews();
 };
+
 const render = () => {
   const newsHTML = newsList
     .map(
@@ -77,6 +86,13 @@ const render = () => {
     .join(" ");
 
   document.getElementById("news-board").innerHTML = newsHTML;
+};
+
+const errorRender = (errorMessage) => {
+  const errorHTML = `<div class="alert alert-danger" role="alert">
+  ${errorMessage}
+</div>`;
+  document.getElementById("news-board").innerHTML = errorHTML;
 };
 
 getLatestNews();

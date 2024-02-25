@@ -52,68 +52,71 @@ async function fetchNews({ category = "", keyword = "" } = {}) {
 }
 
 const render = () => {
-  // array function
   const newsHTML = newsList
     .map(
-      (
-        news
-      ) => `<div class="row news"><div class="col-lg-4"><img class="news-img-size" src=${
-        news.urlToImage ||
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqEWgS0uxxEYJ0PsOb2OgwyWvC0Gjp8NUdPw&usqp=CAU"
-      }>
-                  </div>
-                  <div class="col-lg-8">
-                  <h3>${news.title}</h3>
-                    <p>
-                      ${
-                        news.description == null || news.description == ""
-                          ? "내용없음"
-                          : news.description.length > 200
-                          ? news.description.substring(0, 200) + "..."
-                          : news.description
-                      }
-                                                </p>
-                                                <div>
-                                                    ${
-                                                      news.source.name ||
-                                                      "No source"
-                                                    } * ${moment(
-        news.publishedAt
-      ).fromNow()}
-                                                </div>
-                                            </div>
-                                        </div>`
+      (news) =>
+        `<div class="row news"><div class="col-lg-4"><img class="news-img-size" src=${
+          news.urlToImage ||
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqEWgS0uxxEYJ0PsOb2OgwyWvC0Gjp8NUdPw&usqp=CAU"
+        }></div><div class="col-lg-8"><h3>${news.title}</h3><p>${
+          news.description == null || news.description == ""
+            ? "내용없음"
+            : news.description.length > 200
+            ? news.description.substring(0, 200) + "..."
+            : news.description
+        }</p><div>${news.source.name || "No source"} * ${moment(
+          news.publishedAt
+        ).fromNow()}</div></div></div>`
     )
     .join("");
-
   document.getElementById("news-board").innerHTML = newsHTML;
 };
 
 const errorRender = (errorMessage) => {
-  const errorHTML = `<div class="alert alert-danger" role="alert">
-                        ${errorMessage}
-                    </div>`;
+  const errorHTML = `<div class="alert alert-danger" role="alert">${errorMessage}</div>`;
   document.getElementById("news-board").innerHTML = errorHTML;
 };
 
 const paginationRender = () => {
+  // totalResult V
+  // page V
+  // pageSize V
+  // groupSize V
+  // totalPages
   const totalPages = Math.ceil(totalResults / pageSize);
+  // pageGroup
   const pageGroup = Math.ceil(page / groupSize);
-  const lastPage = pageGroup * groupSize;
+  // lastPage
+  let lastPage = pageGroup * 5;
+  // 마지막 페이지그룹이 그룹사이즈보다 작다면? lastpage = totalpage
   if (lastPage > totalPages) {
-    // 마지막 페이지 그룹이 그룹 사이즈보다 작다? lastpage = totalpage
     lastPage = totalPages;
   }
-  const firstPage =
-    lastPage - (groupSize - 1) < 0 ? 1 : lastPage - (groupSize - 1);
+  // firstPage
+  const firstPage = lastPage - 4 <= 0 ? 1 : lastPage - 4; // => pagination 0부터 시작 x
 
-  // first~last : bootstrap!!!
   let paginationHTML = ``;
+  // Previous버튼
+  if (firstPage >= 6) {
+    paginationHTML = `<li class="page-item" onclick="moveToPage(1)"><a class="page-link" >&lt&lt</a></li>
+  <li class="page-item" onclick="moveToPage(${
+    page - 1
+  })"><a class="page-link" >&lt</a></li>`;
+  }
+
   for (let i = firstPage; i <= lastPage; i++) {
     paginationHTML += `<li class="page-item ${
       i === page ? "active" : ""
-    }" onclick="moveToPage(${i})"><a class="page-link">${i}</a></li>`;
+    }" onclick="moveToPage(${i})" ><a class="page-link" >${i}</a></li>`;
   }
+  // Next버튼
+  if (lastPage < totalPages) {
+    paginationHTML += `<li class="page-item" onclick="moveToPage(${
+      page + 1
+    })"><a class="page-link" >&gt</a></li>
+    <li class="page-item" onclick="moveToPage(${totalPages})"><a class="page-link" >&gt&gt</a></li>`;
+  }
+
   document.querySelector(".pagination").innerHTML = paginationHTML;
 };
 
